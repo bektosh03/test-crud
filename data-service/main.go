@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/bektosh03/test-crud/common/environment"
+	"github.com/bektosh03/test-crud/data-service/app"
 	"github.com/bektosh03/test-crud/data-service/config"
 	"github.com/sirupsen/logrus"
 )
@@ -15,8 +16,9 @@ func init() {
 	logrus.SetOutput(os.Stdout)
 	logrus.SetLevel(logrus.InfoLevel)
 }
+
 func main() {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
 	cfg, err := config.Load()
@@ -31,4 +33,7 @@ func main() {
 		"env":            environment.Current().String(),
 		"listen address": cfg.ListenAddress(),
 	}).Info("loaded config")
+
+	app := app.New()
+	logrus.Infof("FINISHED WITH ERR: %v", app.DownloadPosts(ctx))
 }
