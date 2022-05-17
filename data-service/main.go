@@ -4,6 +4,9 @@ import (
 	"context"
 	"os"
 	"time"
+
+	"github.com/bektosh03/test-crud/common/environment"
+	"github.com/bektosh03/test-crud/data-service/config"
 	"github.com/sirupsen/logrus"
 )
 
@@ -20,13 +23,12 @@ func main() {
 	if err != nil {
 		logrus.Panicf("failed to load config: %v", err)
 	}
-	if cfg.Environment() == environment.Development {
+	if environment.Current() == environment.Development {
 		logrus.SetFormatter(&logrus.TextFormatter{})
 	}
 
 	logrus.WithContext(ctx).WithFields(logrus.Fields{
-		"env":  cfg.Environment().String(),
-		"host": cfg.Host(),
-		"port": cfg.Port(),
+		"env":            environment.Current().String(),
+		"listen address": cfg.ListenAddress(),
 	}).Info("loaded config")
 }
