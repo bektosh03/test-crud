@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package datadb;
+
+option go_package = "github.com/bektosh03/test-crud/genprotos/datapb";
+
+message CollectPostsRequest {}
