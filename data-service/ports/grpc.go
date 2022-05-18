@@ -47,6 +47,6 @@ func (s GrpcServer) DownloadPosts(ctx context.Context, _ *datapb.DownloadPostsRe
 	return &emptypb.Empty{}, nil
 }
 
-// func (s GrpcServer) GetDownloadStatus(ctx context.Context) (*) {
-	
-// }
+func (s GrpcServer) GetDownloadStatus(ctx context.Context, _ *datapb.) (*datapb.GetDownloadStatusResponse, error) {
+
+}
