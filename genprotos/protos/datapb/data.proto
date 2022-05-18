@@ -4,4 +4,4 @@ package datadb;
 
 option go_package = "github.com/bektosh03/test-crud/genprotos/datapb";
 
-message CollectPostsRequest {}
+message DownloadPostsRequest {}

@@ -38,8 +38,9 @@ func (a App) DownloadPosts(ctx context.Context) error {
 	go wp.GenerateJobs(jobs)
 	go wp.Run(ctx)
 
-	postsBatch := make(chan []post.Post)
-	defer close(postsBatch)
+	postsBatch := make(chan []post.Post, numPages)
+
+	errChan := a.postRepo.CreatePostsAsync(ctx, postsBatch)
 
 	for {
 		select {
@@ -64,6 +65,12 @@ func (a App) DownloadPosts(ctx context.Context) error {
 			postsBatch <- posts
 
 		case <-wp.Done():
+			close(postsBatch)
+			if err := <-errChan; err != nil {
+				logrus.Errorf("failed to create posts: %v", err)
+				return err
+			}
+
 			logrus.Infof("elapsed in: %d ms", time.Since(startTime).Milliseconds())
 			return nil
 		}

@@ -3,5 +3,5 @@ package post
 import "context"
 
 type Repository interface {
-	CreatePosts(ctx context.Context, postsBatch <-chan []Post) error
+	CreatePostsAsync(ctx context.Context, postsBatch <-chan []Post) <-chan error
 }

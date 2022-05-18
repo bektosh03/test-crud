@@ -23,7 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DataServiceClient interface {
-	CollectPosts(ctx context.Context, in *CollectPostsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	DownloadPosts(ctx context.Context, in *DownloadPostsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type dataServiceClient struct {
@@ -34,9 +34,9 @@ func NewDataServiceClient(cc grpc.ClientConnInterface) DataServiceClient {
 	return &dataServiceClient{cc}
 }
 
-func (c *dataServiceClient) CollectPosts(ctx context.Context, in *CollectPostsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *dataServiceClient) DownloadPosts(ctx context.Context, in *DownloadPostsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/datadb.DataService/CollectPosts", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/datadb.DataService/DownloadPosts", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func (c *dataServiceClient) CollectPosts(ctx context.Context, in *CollectPostsRe
 // All implementations must embed UnimplementedDataServiceServer
 // for forward compatibility
 type DataServiceServer interface {
-	CollectPosts(context.Context, *CollectPostsRequest) (*emptypb.Empty, error)
+	DownloadPosts(context.Context, *DownloadPostsRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedDataServiceServer()
 }
 
@@ -55,8 +55,8 @@ type DataServiceServer interface {
 type UnimplementedDataServiceServer struct {
 }
 
-func (UnimplementedDataServiceServer) CollectPosts(context.Context, *CollectPostsRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CollectPosts not implemented")
+func (UnimplementedDataServiceServer) DownloadPosts(context.Context, *DownloadPostsRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DownloadPosts not implemented")
 }
 func (UnimplementedDataServiceServer) mustEmbedUnimplementedDataServiceServer() {}
 
@@ -71,20 +71,20 @@ func RegisterDataServiceServer(s grpc.ServiceRegistrar, srv DataServiceServer) {
 	s.RegisterService(&DataService_ServiceDesc, srv)
 }
 
-func _DataService_CollectPosts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CollectPostsRequest)
+func _DataService_DownloadPosts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DownloadPostsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DataServiceServer).CollectPosts(ctx, in)
+		return srv.(DataServiceServer).DownloadPosts(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/datadb.DataService/CollectPosts",
+		FullMethod: "/datadb.DataService/DownloadPosts",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DataServiceServer).CollectPosts(ctx, req.(*CollectPostsRequest))
+		return srv.(DataServiceServer).DownloadPosts(ctx, req.(*DownloadPostsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -97,8 +97,8 @@ var DataService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*DataServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "CollectPosts",
-			Handler:    _DataService_CollectPosts_Handler,
+			MethodName: "DownloadPosts",
+			Handler:    _DataService_DownloadPosts_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

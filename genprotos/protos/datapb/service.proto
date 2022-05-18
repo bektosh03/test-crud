@@ -8,5 +8,5 @@ import "google/protobuf/empty.proto";
 option go_package = "github.com/bektosh03/test-crud/genprotos/datapb";
 
 service DataService {
-    rpc CollectPosts (CollectPostsRequest) returns (google.protobuf.Empty);
+    rpc DownloadPosts (DownloadPostsRequest) returns (google.protobuf.Empty);
 }

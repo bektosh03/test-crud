@@ -28,27 +28,34 @@ func NewPostgresRepository(db *sqlx.DB) *PostgresRepository {
 	}
 }
 
-func (r *PostgresRepository) CreatePosts(ctx context.Context, postsBatch <-chan []post.Post) error {
-	err := r.transact(func(tx *sqlx.Tx) error {
-		for {
-			select {
-			case posts, ok := <-postsBatch:
-				if !ok {
-					return nil
-				}
+func (r *PostgresRepository) CreatePostsAsync(ctx context.Context, postsBatch <-chan []post.Post) <-chan error {
+	errChan := make(chan error)
+	go func() {
+		defer close(errChan)
+		err := r.transact(func(tx *sqlx.Tx) error {
+			for {
+				select {
+				case posts, ok := <-postsBatch:
+					if !ok {
+						return nil
+					}
 
-				if err := createPosts(ctx, tx, posts); err != nil {
-					return err
-				}
+					if err := createPosts(ctx, tx, posts); err != nil {
+						logrus.Errorf("error while creating posts: %v", err)
+						return err
+					}
 
-			case <-ctx.Done():
-				logrus.Errorf("canceled create posts, error: %v", ctx.Err())
-				return ctx.Err()
+				case <-ctx.Done():
+					logrus.Errorf("canceled create posts, error: %v", ctx.Err())
+					return ctx.Err()
+				}
 			}
-		}
-	})
+		})
 
-	return err
+		errChan <- err
+	}()
+
+	return errChan
 }
 
 func (r *PostgresRepository) transact(txFunc func(*sqlx.Tx) error) error {
