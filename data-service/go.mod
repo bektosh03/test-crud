@@ -4,8 +4,10 @@ go 1.18
 
 require (
 	github.com/bektosh03/test-crud/common v0.0.0-20220517133155-8497bdd5959b
+	github.com/jmoiron/sqlx v1.3.5
 	github.com/joho/godotenv v1.4.0
 	github.com/kelseyhightower/envconfig v1.4.0
+	github.com/lib/pq v1.2.0
 	github.com/sirupsen/logrus v1.8.1
 )
 

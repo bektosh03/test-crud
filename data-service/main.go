@@ -6,8 +6,11 @@ import (
 	"time"
 
 	"github.com/bektosh03/test-crud/common/environment"
+	"github.com/bektosh03/test-crud/data-service/adapters"
 	"github.com/bektosh03/test-crud/data-service/app"
 	"github.com/bektosh03/test-crud/data-service/config"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 )
 
@@ -34,6 +37,16 @@ func main() {
 		"listen address": cfg.ListenAddress(),
 	}).Info("loaded config")
 
-	app := app.New()
+	db, err := connectDB(ctx, cfg)
+	if err != nil {
+		logrus.Panicf("failed to connect to db: %v; connString: %s", err, cfg.PostgresConnString())
+	}
+	defer db.Close()
+
+	app := app.New(adapters.NewPostgresRepository(db))
 	logrus.Infof("FINISHED WITH ERR: %v", app.DownloadPosts(ctx))
+}
+
+func connectDB(ctx context.Context, cfg config.Config) (*sqlx.DB, error) {
+	return sqlx.ConnectContext(ctx, "postgres", cfg.PostgresConnString())
 }

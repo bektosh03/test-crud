@@ -33,7 +33,7 @@ func TestPool(t *testing.T) {
 				t.Fatalf("wrong type; expected int got %T", r.Value)
 			}
 
-			expectedVal := r.Descriptor.ID * r.Descriptor.ID
+			expectedVal := r.Descriptor.JobID * r.Descriptor.JobID
 			if val != expectedVal {
 				t.Fatalf("wrong value; expected %v got %v", expectedVal, val)
 			}
@@ -59,7 +59,7 @@ func testJobs() []Job {
 	for i := 0; i < jobsCount; i++ {
 		jobs = append(jobs, Job{
 			Descriptor: JobDescriptor{
-				ID:       i,
+				JobID:    i,
 				Metadata: nil,
 			},
 			Exec: testExecFn,

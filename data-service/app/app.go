@@ -1,112 +1,121 @@
 package app
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-	"runtime"
+	"time"
 
-	"github.com/bektosh03/test-crud/data-service/app/urlpaginator"
-	"github.com/bektosh03/test-crud/data-service/app/worker"
 	"github.com/bektosh03/test-crud/data-service/domain/post"
+	"github.com/bektosh03/test-crud/data-service/internal/urlpaginator"
+	"github.com/bektosh03/test-crud/data-service/internal/worker"
 	"github.com/sirupsen/logrus"
 )
 
 const (
-	NumPages = 50
+	numPages = 50
 	postsURL = "https://gorest.co.in/public/v1/posts"
 )
 
 type App struct {
-	wp worker.Pool
+	postRepo post.Repository
 }
 
-func New() App {
+func New(postRepo post.Repository) App {
 	return App{
-		wp: worker.NewPool(runtime.NumCPU()),
+		postRepo: postRepo,
 	}
 }
 
 func (a App) DownloadPosts(ctx context.Context) error {
-	jobs := make([]worker.Job, 0, NumPages)
-	var execFn worker.ExecFn = func(ctx context.Context, arg interface{}) (interface{}, error) {
-		url, ok := arg.(string)
-		if !ok {
-			return nil, fmt.Errorf("wrong argument type: %T", arg)
-		}
+	wp := worker.NewPool(4)
+	jobs := a.createJobs(postsURL, numPages)
 
-		request, err := http.NewRequestWithContext(ctx, http.MethodGet, url, &bytes.Buffer{})
-		if err != nil {
-			return nil, err
-		}
-		httpResponse, err := http.DefaultClient.Do(request)
-		if err != nil {
-			return nil, err
-		}
-		if !(httpResponse.StatusCode >= 200 && httpResponse.StatusCode < 300) {
-			logrus.Infof("STATUS CODE: %d", httpResponse.StatusCode)
-			body, err := io.ReadAll(httpResponse.Body)
-			if err != nil {
-				logrus.Errorf("failed to read from response body")
-				return nil, err
-			}
-			logrus.Infof("unsuccessfull response from server: %v", string(body))
-			return nil, fmt.Errorf("unsuccessfull response from server: %v", string(body))
-		}
-		logrus.Infof("URL: %s, HTTP RESPONSE: %v, BODY: %v", url, httpResponse, httpResponse.Body)
+	startTime := time.Now()
 
-		var response GetPostsResponse
-		if err = json.NewDecoder(httpResponse.Body).Decode(&response); err != nil {
-			return nil, err
-		}
+	go wp.GenerateJobs(jobs)
+	go wp.Run(ctx)
 
-		return response.Data, nil
-	}
-
-	urlPaginator := urlpaginator.New(postsURL, NumPages)
-	logrus.Info("BEFORE FOR LOOP")
-	for urlPaginator.NextPage() {
-		jobs = append(jobs, worker.Job{
-			Descriptor: worker.JobDescriptor{
-				ID: urlPaginator.CurrentPage(),
-				Metadata: map[string]interface{}{
-					"url": urlPaginator.URL(),
-				},
-			},
-			Exec: execFn,
-			Arg:  urlPaginator.URL(),
-		})
-	}
-
-	logrus.Info("AFTER FOR LOOP")
-
-	go a.wp.GenerateJobs(jobs)
-	go a.wp.Run(ctx)
+	postsBatch := make(chan []post.Post)
+	defer close(postsBatch)
 
 	for {
 		select {
-		case result, ok := <-a.wp.Results():
+		case result, ok := <-wp.Results():
 			if !ok {
 				continue
 			}
+			if result.Err != nil {
+				logrus.WithFields(logrus.Fields{
+					"job_id":   result.Descriptor.JobID,
+					"metadata": result.Descriptor.Metadata,
+					"error":    result.Err.Error(),
+				}).Error("Failed job")
+				return result.Err
+			}
 
-			logrus.Infof("VALUE: %v", result.Value)
-			val, ok := result.Value.([]post.Post)
+			posts, ok := result.Value.([]post.Post)
 			if !ok {
 				return fmt.Errorf("wrong value type: %T", result.Value)
 			}
 
-			logrus.Infof("fetched: %v", val)
+			postsBatch <- posts
 
-		case <-a.wp.Done():
+		case <-wp.Done():
+			logrus.Infof("elapsed in: %d ms", time.Since(startTime).Milliseconds())
 			return nil
-			// default:
-			// 	logrus.Info("DEFAULT")
 		}
 	}
+}
+
+func (a App) downloadPosts(ctx context.Context, arg interface{}) (interface{}, error) {
+	url, ok := arg.(string)
+	if !ok {
+		return nil, fmt.Errorf("wrong argument type: %T", arg)
+	}
+
+	httpResponse, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	if !(httpResponse.StatusCode >= 200 && httpResponse.StatusCode < 300) {
+		body, err := io.ReadAll(httpResponse.Body)
+		if err != nil {
+			logrus.Errorf("failed to read from response body: %v", err)
+			return nil, err
+		}
+
+		logrus.Errorf("unsuccessfull response from server: %v", string(body))
+		return nil, fmt.Errorf("server responded with: %d", httpResponse.StatusCode)
+	}
+
+	var response GetPostsResponse
+	if err = json.NewDecoder(httpResponse.Body).Decode(&response); err != nil {
+		return nil, err
+	}
+
+	return response.Data, nil
+}
+
+func (a App) createJobs(url string, pagesCount int) []worker.Job {
+	jobs := make([]worker.Job, 0, pagesCount)
+	urlPaginator := urlpaginator.New(url, pagesCount)
+	for urlPaginator.NextPage() {
+		jobs = append(jobs, worker.Job{
+			Descriptor: worker.JobDescriptor{
+				JobID: urlPaginator.CurrentPage(),
+				Metadata: map[string]interface{}{
+					"url": urlPaginator.URL(),
+				},
+			},
+			Exec: a.downloadPosts,
+			Arg:  urlPaginator.URL(),
+		})
+	}
+
+	return jobs
 }
 
 type GetPostsResponse struct {

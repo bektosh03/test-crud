@@ -9,7 +9,7 @@ type Job struct {
 }
 
 type JobDescriptor struct {
-	ID       int
+	JobID    int
 	Metadata map[string]interface{}
 }
 
@@ -25,13 +25,13 @@ func (j Job) execute(ctx context.Context) Result {
 	value, err := j.Exec(ctx, j.Arg)
 	if err != nil {
 		return Result{
-			Err: err,
+			Err:        err,
 			Descriptor: j.Descriptor,
 		}
 	}
 
 	return Result{
-		Value: value,
+		Value:      value,
 		Descriptor: j.Descriptor,
 	}
 }

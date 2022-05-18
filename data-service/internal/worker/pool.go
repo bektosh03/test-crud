@@ -36,6 +36,10 @@ type Pool struct {
 }
 
 func NewPool(wCount int) Pool {
+	if wCount < 1 {
+		panic("negative worker count")
+	}
+
 	return Pool{
 		workersCount: wCount,
 		jobs:         make(chan Job, wCount),
