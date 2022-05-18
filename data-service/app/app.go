@@ -77,6 +77,14 @@ func (a App) DownloadPosts(ctx context.Context) error {
 	}
 }
 
+func (a App) SetDownloadStatus(ctx context.Context, success bool, downloadErr error) error {
+	return a.postRepo.SetDownloadStatus(ctx, success, downloadErr)
+}
+
+func (a App) GetDownloadStatus(ctx context.Context) (success bool, errMsg string, err error) {
+	return a.postRepo.GetDownloadStatus(ctx)
+}
+
 func (a App) downloadPosts(ctx context.Context, arg interface{}) (interface{}, error) {
 	url, ok := arg.(string)
 	if !ok {

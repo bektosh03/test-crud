@@ -2,14 +2,20 @@ package adapters
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/bektosh03/test-crud/data-service/domain/post"
+	"github.com/bektosh03/test-crud/data-service/internal/errs"
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
 )
 
-const postsTableName = "posts"
+const (
+	postsTableName          = "posts"
+	downloadStatusTableName = "download_status"
+)
 
 type postModel struct {
 	ID     int    `db:"id"`
@@ -35,8 +41,8 @@ func (r *PostgresRepository) CreatePostsAsync(ctx context.Context, postsBatch <-
 		err := r.transact(func(tx *sqlx.Tx) error {
 			for {
 				select {
-				case posts, ok := <-postsBatch:
-					if !ok {
+				case posts, open := <-postsBatch:
+					if !open {
 						return nil
 					}
 
@@ -56,6 +62,14 @@ func (r *PostgresRepository) CreatePostsAsync(ctx context.Context, postsBatch <-
 	}()
 
 	return errChan
+}
+
+func (r *PostgresRepository) SetDownloadStatus(ctx context.Context, success bool, downloadErr error) error {
+	return setDownloadStatus(ctx, r.db, success, downloadErr)
+}
+
+func (r *PostgresRepository) GetDownloadStatus(ctx context.Context) (success bool, errMsg string, err error) {
+	return getDownloadStatus(ctx, r.db)
 }
 
 func (r *PostgresRepository) transact(txFunc func(*sqlx.Tx) error) error {
@@ -96,6 +110,39 @@ func createPost(ctx context.Context, tx *sqlx.Tx, pm postModel) error {
 	_, err := tx.ExecContext(ctx, query, pm.ID, pm.UserID, pm.Title, pm.Body)
 
 	return err
+}
+
+func setDownloadStatus(ctx context.Context, db *sqlx.DB, success bool, downloadErr error) error {
+	query := fmt.Sprintf(
+		`INSERT INTO %s (success, err) VALUES ($1, $2)`, downloadStatusTableName,
+	)
+	var errWrapper sql.NullString
+	if downloadErr != nil {
+		errWrapper = sql.NullString{
+			String: downloadErr.Error(),
+			Valid:  true,
+		}
+	}
+
+	_, err := db.ExecContext(ctx, query, success, errWrapper)
+
+	return err
+}
+
+func getDownloadStatus(ctx context.Context, db *sqlx.DB) (success bool, errMsg string, err error) {
+	query := fmt.Sprintf(`SELECT * FROM %s ORDER BY created_at ASC LIMIT 1`, downloadStatusTableName)
+	var errWrapper sql.NullString
+
+	err = db.QueryRowxContext(ctx, query).Scan(&success, &errWrapper)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, "", errs.ErrNotFound
+		}
+
+		return false, "", err
+	}
+
+	return success, errWrapper.String, nil
 }
 
 func toPostModel(p post.Post) postModel {

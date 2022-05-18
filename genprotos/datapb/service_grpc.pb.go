@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DataServiceClient interface {
 	DownloadPosts(ctx context.Context, in *DownloadPostsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetDownloadStatus(ctx context.Context, in *GetDownloadStatusRequest, opts ...grpc.CallOption) (*GetDownloadStatusResponse, error)
 }
 
 type dataServiceClient struct {
@@ -43,11 +44,21 @@ func (c *dataServiceClient) DownloadPosts(ctx context.Context, in *DownloadPosts
 	return out, nil
 }
 
+func (c *dataServiceClient) GetDownloadStatus(ctx context.Context, in *GetDownloadStatusRequest, opts ...grpc.CallOption) (*GetDownloadStatusResponse, error) {
+	out := new(GetDownloadStatusResponse)
+	err := c.cc.Invoke(ctx, "/datadb.DataService/GetDownloadStatus", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DataServiceServer is the server API for DataService service.
 // All implementations must embed UnimplementedDataServiceServer
 // for forward compatibility
 type DataServiceServer interface {
 	DownloadPosts(context.Context, *DownloadPostsRequest) (*emptypb.Empty, error)
+	GetDownloadStatus(context.Context, *GetDownloadStatusRequest) (*GetDownloadStatusResponse, error)
 	mustEmbedUnimplementedDataServiceServer()
 }
 
@@ -57,6 +68,9 @@ type UnimplementedDataServiceServer struct {
 
 func (UnimplementedDataServiceServer) DownloadPosts(context.Context, *DownloadPostsRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DownloadPosts not implemented")
+}
+func (UnimplementedDataServiceServer) GetDownloadStatus(context.Context, *GetDownloadStatusRequest) (*GetDownloadStatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetDownloadStatus not implemented")
 }
 func (UnimplementedDataServiceServer) mustEmbedUnimplementedDataServiceServer() {}
 
@@ -89,6 +103,24 @@ func _DataService_DownloadPosts_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DataService_GetDownloadStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDownloadStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DataServiceServer).GetDownloadStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/datadb.DataService/GetDownloadStatus",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DataServiceServer).GetDownloadStatus(ctx, req.(*GetDownloadStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // DataService_ServiceDesc is the grpc.ServiceDesc for DataService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -99,6 +131,10 @@ var DataService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DownloadPosts",
 			Handler:    _DataService_DownloadPosts_Handler,
+		},
+		{
+			MethodName: "GetDownloadStatus",
+			Handler:    _DataService_GetDownloadStatus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

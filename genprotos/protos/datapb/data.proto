@@ -5,3 +5,10 @@ package datadb;
 option go_package = "github.com/bektosh03/test-crud/genprotos/datapb";
 
 message DownloadPostsRequest {}
+
+message GetDownloadStatusRequest {}
+
+message GetDownloadStatusResponse {
+    bool success = 1;
+    string err_msg = 2;
+}

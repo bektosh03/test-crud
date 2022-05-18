@@ -6,12 +6,16 @@ import (
 	"time"
 
 	"github.com/bektosh03/test-crud/common/environment"
+	"github.com/bektosh03/test-crud/common/server"
 	"github.com/bektosh03/test-crud/data-service/adapters"
 	"github.com/bektosh03/test-crud/data-service/app"
 	"github.com/bektosh03/test-crud/data-service/config"
-	"github.com/jmoiron/sqlx"
+	"github.com/bektosh03/test-crud/data-service/internal/postgres"
+	"github.com/bektosh03/test-crud/data-service/ports"
+	"github.com/bektosh03/test-crud/genprotos/datapb"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
 )
 
 func init() {
@@ -37,16 +41,15 @@ func main() {
 		"listen address": cfg.ListenAddress(),
 	}).Info("loaded config")
 
-	db, err := connectDB(ctx, cfg)
+	db, err := postgres.Connect(ctx, cfg)
 	if err != nil {
 		logrus.Panicf("failed to connect to db: %v; connString: %s", err, cfg.PostgresConnString())
 	}
 	defer db.Close()
 
 	app := app.New(adapters.NewPostgresRepository(db))
-	logrus.Infof("FINISHED WITH ERR: %v", app.DownloadPosts(ctx))
-}
-
-func connectDB(ctx context.Context, cfg config.Config) (*sqlx.DB, error) {
-	return sqlx.ConnectContext(ctx, "postgres", cfg.PostgresConnString())
+	server.RunGRPCServer(cfg.ListenAddress(), func(s *grpc.Server) {
+		svc := ports.NewGrpcServer(&app)
+		datapb.RegisterDataServiceServer(s, svc)
+	})
 }

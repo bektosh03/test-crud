@@ -9,4 +9,5 @@ option go_package = "github.com/bektosh03/test-crud/genprotos/datapb";
 
 service DataService {
     rpc DownloadPosts (DownloadPostsRequest) returns (google.protobuf.Empty);
+    rpc GetDownloadStatus (GetDownloadStatusRequest) returns (GetDownloadStatusResponse);
 }

@@ -4,3 +4,9 @@ CREATE TABLE IF NOT EXISTS posts (
     title VARCHAR(255) NOT NULL,
     body TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS download_status (
+    success BOOLEAN NOT NULL
+    error TEXT
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+)
