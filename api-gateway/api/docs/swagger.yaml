@@ -1,0 +1,152 @@
+definitions:
+  httperr.ErrorResponse:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+    type: object
+  ports.ListPostsResponse:
+    properties:
+      posts:
+        items:
+          $ref: '#/definitions/ports.Post'
+        type: array
+    type: object
+  ports.Post:
+    properties:
+      body:
+        type: string
+      id:
+        type: integer
+      title:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  ports.ResponseMessage:
+    properties:
+      message:
+        type: string
+    type: object
+info:
+  contact:
+    email: madaminovsbektosh@gmail.com
+    name: Bektosh Madaminov
+  description: This is a first version of HilolTest APIs
+  title: HilolTest API
+  version: "1.0"
+paths:
+  /posts:
+    delete:
+      description: API for deleting a post
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ports.ResponseMessage'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/httperr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httperr.ErrorResponse'
+      summary: delete a post
+      tags:
+      - posts
+    get:
+      description: API for fetching a list of posts
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ports.ListPostsResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httperr.ErrorResponse'
+      summary: get list of posts
+      tags:
+      - posts
+    put:
+      description: API for updating post's info
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ports.ResponseMessage'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/httperr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httperr.ErrorResponse'
+      summary: update post info
+      tags:
+      - posts
+  /posts/{post-id}:
+    get:
+      description: API for fetching an individual post
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ports.Post'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/httperr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httperr.ErrorResponse'
+      summary: get individual post
+      tags:
+      - posts
+  /posts/download:
+    post:
+      description: API for starting the download of posts
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ports.ResponseMessage'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httperr.ErrorResponse'
+      summary: start downloading posts
+      tags:
+      - posts
+  /posts/download/status:
+    get:
+      description: API for checking the status of posts download
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ports.ResponseMessage'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httperr.ErrorResponse'
+      summary: report back status of downloading posts
+      tags:
+      - posts
+swagger: "2.0"
