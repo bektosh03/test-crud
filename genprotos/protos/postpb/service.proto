@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package postpb;
+
+import "protos/postpb/post.proto";
+import "google/protobuf/empty.proto";
+
+option go_package = "github.com/bektosh03/test-crud/genprotos/postpb";
+
+service PostService {
+    rpc GetPost (GetPostRequest) returns (Post);
+    rpc ListsPost (ListPostsRequest) returns (ListPostsResponse);
+    rpc UpdatePost (Post) returns (google.protobuf.Empty);
+    rpc DeletePost (DeletePostRequest) returns (google.protobuf.Empty);
+}

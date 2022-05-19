@@ -47,6 +47,19 @@ func (s GrpcServer) DownloadPosts(ctx context.Context, _ *datapb.DownloadPostsRe
 	return &emptypb.Empty{}, nil
 }
 
-func (s GrpcServer) GetDownloadStatus(ctx context.Context, _ *datapb.) (*datapb.GetDownloadStatusResponse, error) {
+func (s GrpcServer) GetDownloadStatus(ctx context.Context, _ *datapb.GetDownloadStatusRequest) (*datapb.GetDownloadStatusResponse, error) {
+	success, errMsg, err := s.app.GetDownloadStatus(ctx)
+	if err != nil && err != errs.ErrNotFound {
+		return &datapb.GetDownloadStatusResponse{}, status.Error(codes.Internal, err.Error())
+	} else if err == errs.ErrNotFound {
+		return &datapb.GetDownloadStatusResponse{
+			Success: false,
+			ErrMsg:  "download request has not yet been received",
+		}, nil
+	}
 
+	return &datapb.GetDownloadStatusResponse{
+		Success: success,
+		ErrMsg:  errMsg,
+	}, nil
 }

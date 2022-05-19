@@ -24,7 +24,45 @@ type PostgresRepository struct {
 }
 
 func (r *PostgresRepository) GetPost(ctx context.Context, postID int) (post.Post, error) {
-	
+	pm, err := getPost(ctx, r.db, postID)
+	if err != nil {
+		return post.Post{}, err
+	}
+
+	return post.New(pm.ID, pm.UserID, pm.Title, pm.Body)
+}
+
+func (r *PostgresRepository) ListPosts(ctx context.Context, page, limit int) ([]post.Post, error) {
+	postModels, err := listPosts(ctx, r.db, page, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	posts := make([]post.Post, 0, len(postModels))
+	for _, pm := range postModels {
+		p, err := post.New(pm.ID, pm.UserID, pm.Title, pm.Body)
+		if err != nil {
+			return nil, err
+		}
+		posts = append(posts, p)
+	}
+
+	return posts, nil
+}
+
+func (r *PostgresRepository) UpdatePost(ctx context.Context, p post.Post) error {
+	pm := postModel{
+		ID:     p.ID(),
+		UserID: p.UserID(),
+		Title:  p.Title(),
+		Body:   p.Body(),
+	}
+
+	return updatePost(ctx, r.db, pm)
+}
+
+func (r *PostgresRepository) DeletePost(ctx context.Context, postID int) error {
+	return deletePost(ctx, r.db, postID)
 }
 
 func getPost(ctx context.Context, db *sqlx.DB, postID int) (postModel, error) {

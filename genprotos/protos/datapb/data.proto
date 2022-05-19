@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package datadb;
+package datapb;
 
 option go_package = "github.com/bektosh03/test-crud/genprotos/datapb";
 

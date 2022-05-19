@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS posts (
 );
 
 CREATE TABLE IF NOT EXISTS download_status (
-    success BOOLEAN NOT NULL
-    error TEXT
+    success BOOLEAN NOT NULL,
+    error TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 )

@@ -3,8 +3,8 @@ module github.com/bektosh03/test-crud/data-service
 go 1.18
 
 require (
-	github.com/bektosh03/test-crud/common v0.0.0-20220518192801-f9daf186fdf0
-	github.com/bektosh03/test-crud/genprotos v0.0.0-20220518192801-f9daf186fdf0
+	github.com/bektosh03/test-crud/common v0.0.0-20220518211815-0338e466834e
+	github.com/bektosh03/test-crud/genprotos v0.0.0-20220518211815-0338e466834e
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/joho/godotenv v1.4.0
 	github.com/kelseyhightower/envconfig v1.4.0

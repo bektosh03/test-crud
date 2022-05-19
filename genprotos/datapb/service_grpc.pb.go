@@ -37,7 +37,7 @@ func NewDataServiceClient(cc grpc.ClientConnInterface) DataServiceClient {
 
 func (c *dataServiceClient) DownloadPosts(ctx context.Context, in *DownloadPostsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/datadb.DataService/DownloadPosts", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/datapb.DataService/DownloadPosts", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (c *dataServiceClient) DownloadPosts(ctx context.Context, in *DownloadPosts
 
 func (c *dataServiceClient) GetDownloadStatus(ctx context.Context, in *GetDownloadStatusRequest, opts ...grpc.CallOption) (*GetDownloadStatusResponse, error) {
 	out := new(GetDownloadStatusResponse)
-	err := c.cc.Invoke(ctx, "/datadb.DataService/GetDownloadStatus", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/datapb.DataService/GetDownloadStatus", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +95,7 @@ func _DataService_DownloadPosts_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/datadb.DataService/DownloadPosts",
+		FullMethod: "/datapb.DataService/DownloadPosts",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(DataServiceServer).DownloadPosts(ctx, req.(*DownloadPostsRequest))
@@ -113,7 +113,7 @@ func _DataService_GetDownloadStatus_Handler(srv interface{}, ctx context.Context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/datadb.DataService/GetDownloadStatus",
+		FullMethod: "/datapb.DataService/GetDownloadStatus",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(DataServiceServer).GetDownloadStatus(ctx, req.(*GetDownloadStatusRequest))
@@ -125,7 +125,7 @@ func _DataService_GetDownloadStatus_Handler(srv interface{}, ctx context.Context
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var DataService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "datadb.DataService",
+	ServiceName: "datapb.DataService",
 	HandlerType: (*DataServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
