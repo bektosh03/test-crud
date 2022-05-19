@@ -40,7 +40,7 @@ func main() {
 		"listen address": cfg.ListenAddress(),
 	}).Info("loaded config")
 
-	db, err := postgres.Connect(ctx, cfg)
+	db, err := postgres.Connect(ctx, postgres.Config{ConnString: cfg.PostgresConnString()})
 	if err != nil {
 		logrus.Panicf("failed to connect to db: %v; connString: %s", err, cfg.PostgresConnString())
 	}

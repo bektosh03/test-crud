@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 
+	_ "github.com/lib/pq"
 	"github.com/jmoiron/sqlx"
 )
 

@@ -15,6 +15,7 @@ import (
 
 type GrpcServer struct {
 	app app.App
+	postpb.UnimplementedPostServiceServer
 }
 
 func NewGrpcServer(app app.App) GrpcServer {
