@@ -7,7 +7,7 @@ import (
 	"fmt"
 
 	"github.com/bektosh03/test-crud/data-service/domain/post"
-	"github.com/bektosh03/test-crud/data-service/internal/errs"
+	"github.com/bektosh03/test-crud/common/errs"
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
 )

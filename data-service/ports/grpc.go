@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/bektosh03/test-crud/data-service/app"
-	"github.com/bektosh03/test-crud/data-service/internal/errs"
+	"github.com/bektosh03/test-crud/common/errs"
 	"github.com/bektosh03/test-crud/genprotos/datapb"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
