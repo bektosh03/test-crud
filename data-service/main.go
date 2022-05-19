@@ -10,7 +10,7 @@ import (
 	"github.com/bektosh03/test-crud/data-service/adapters"
 	"github.com/bektosh03/test-crud/data-service/app"
 	"github.com/bektosh03/test-crud/data-service/config"
-	"github.com/bektosh03/test-crud/data-service/internal/postgres"
+	"github.com/bektosh03/test-crud/common/postgres"
 	"github.com/bektosh03/test-crud/data-service/ports"
 	"github.com/bektosh03/test-crud/genprotos/datapb"
 	_ "github.com/lib/pq"

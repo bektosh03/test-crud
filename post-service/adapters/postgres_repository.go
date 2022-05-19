@@ -23,6 +23,12 @@ type PostgresRepository struct {
 	db *sqlx.DB
 }
 
+func NewPostgresRepository(db *sqlx.DB) *PostgresRepository {
+	return &PostgresRepository{
+		db: db,
+	}
+}
+
 func (r *PostgresRepository) GetPost(ctx context.Context, postID int) (post.Post, error) {
 	pm, err := getPost(ctx, r.db, postID)
 	if err != nil {

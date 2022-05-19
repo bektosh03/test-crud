@@ -24,7 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PostServiceClient interface {
 	GetPost(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*Post, error)
-	ListsPost(ctx context.Context, in *ListPostsRequest, opts ...grpc.CallOption) (*ListPostsResponse, error)
+	ListPosts(ctx context.Context, in *ListPostsRequest, opts ...grpc.CallOption) (*ListPostsResponse, error)
 	UpdatePost(ctx context.Context, in *Post, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	DeletePost(ctx context.Context, in *DeletePostRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
@@ -46,9 +46,9 @@ func (c *postServiceClient) GetPost(ctx context.Context, in *GetPostRequest, opt
 	return out, nil
 }
 
-func (c *postServiceClient) ListsPost(ctx context.Context, in *ListPostsRequest, opts ...grpc.CallOption) (*ListPostsResponse, error) {
+func (c *postServiceClient) ListPosts(ctx context.Context, in *ListPostsRequest, opts ...grpc.CallOption) (*ListPostsResponse, error) {
 	out := new(ListPostsResponse)
-	err := c.cc.Invoke(ctx, "/postpb.PostService/ListsPost", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/postpb.PostService/ListPosts", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func (c *postServiceClient) DeletePost(ctx context.Context, in *DeletePostReques
 // for forward compatibility
 type PostServiceServer interface {
 	GetPost(context.Context, *GetPostRequest) (*Post, error)
-	ListsPost(context.Context, *ListPostsRequest) (*ListPostsResponse, error)
+	ListPosts(context.Context, *ListPostsRequest) (*ListPostsResponse, error)
 	UpdatePost(context.Context, *Post) (*emptypb.Empty, error)
 	DeletePost(context.Context, *DeletePostRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedPostServiceServer()
@@ -91,8 +91,8 @@ type UnimplementedPostServiceServer struct {
 func (UnimplementedPostServiceServer) GetPost(context.Context, *GetPostRequest) (*Post, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPost not implemented")
 }
-func (UnimplementedPostServiceServer) ListsPost(context.Context, *ListPostsRequest) (*ListPostsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListsPost not implemented")
+func (UnimplementedPostServiceServer) ListPosts(context.Context, *ListPostsRequest) (*ListPostsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListPosts not implemented")
 }
 func (UnimplementedPostServiceServer) UpdatePost(context.Context, *Post) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdatePost not implemented")
@@ -131,20 +131,20 @@ func _PostService_GetPost_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PostService_ListsPost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _PostService_ListPosts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListPostsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PostServiceServer).ListsPost(ctx, in)
+		return srv.(PostServiceServer).ListPosts(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/postpb.PostService/ListsPost",
+		FullMethod: "/postpb.PostService/ListPosts",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PostServiceServer).ListsPost(ctx, req.(*ListPostsRequest))
+		return srv.(PostServiceServer).ListPosts(ctx, req.(*ListPostsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -197,8 +197,8 @@ var PostService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _PostService_GetPost_Handler,
 		},
 		{
-			MethodName: "ListsPost",
-			Handler:    _PostService_ListsPost_Handler,
+			MethodName: "ListPosts",
+			Handler:    _PostService_ListPosts_Handler,
 		},
 		{
 			MethodName: "UpdatePost",

@@ -3,8 +3,8 @@ module github.com/bektosh03/test-crud/post-service
 go 1.18
 
 require (
-	github.com/bektosh03/test-crud/common v0.0.0-20220519074616-7cfe6318d87c
-	github.com/bektosh03/test-crud/genprotos v0.0.0-20220519072655-701573904e9d
+	github.com/bektosh03/test-crud/common v0.0.0-20220519080742-1f8b695c5718
+	github.com/bektosh03/test-crud/genprotos v0.0.0-20220519074616-7cfe6318d87c
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/joho/godotenv v1.4.0
 	github.com/kelseyhightower/envconfig v1.4.0
@@ -14,6 +14,7 @@ require (
 )
 
 require (
+	github.com/bektosh03/test-crud/data-service v0.0.0-20220519080742-1f8b695c5718 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	golang.org/x/net v0.0.0-20201021035429-f5854403a974 // indirect
 	golang.org/x/sys v0.0.0-20210119212857-b64e53b001e4 // indirect
