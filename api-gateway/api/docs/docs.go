@@ -19,7 +19,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/posts": {
+        "/api/posts": {
             "get": {
                 "description": "API for fetching a list of posts",
                 "produces": [
@@ -29,6 +29,22 @@ const docTemplate = `{
                     "posts"
                 ],
                 "summary": "get list of posts",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "page",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "limit",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -53,36 +69,17 @@ const docTemplate = `{
                     "posts"
                 ],
                 "summary": "update post info",
-                "responses": {
-                    "200": {
-                        "description": "OK",
+                "parameters": [
+                    {
+                        "description": "post",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
                         "schema": {
-                            "$ref": "#/definitions/ports.ResponseMessage"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/httperr.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/httperr.ErrorResponse"
+                            "$ref": "#/definitions/ports.UpdatePostRequest"
                         }
                     }
-                }
-            },
-            "delete": {
-                "description": "API for deleting a post",
-                "produces": [
-                    "application/json"
                 ],
-                "tags": [
-                    "posts"
-                ],
-                "summary": "delete a post",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -105,7 +102,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/posts/download": {
+        "/api/posts/download": {
             "post": {
                 "description": "API for starting the download of posts",
                 "produces": [
@@ -131,7 +128,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/posts/download/status": {
+        "/api/posts/download/status": {
             "get": {
                 "description": "API for checking the status of posts download",
                 "produces": [
@@ -157,7 +154,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/posts/{post-id}": {
+        "/api/posts/{post-id}": {
             "get": {
                 "description": "API for fetching an individual post",
                 "produces": [
@@ -167,11 +164,59 @@ const docTemplate = `{
                     "posts"
                 ],
                 "summary": "get individual post",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "post-id",
+                        "name": "post-id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/ports.Post"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/httperr.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/httperr.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "API for deleting a post",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "delete a post",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "post-id",
+                        "name": "post-id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ports.ResponseMessage"
                         }
                     },
                     "404": {
@@ -237,6 +282,20 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "ports.UpdatePostRequest": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "post_id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
         }
     }
 }`
@@ -247,8 +306,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "HilolTest API",
-	Description:      "This is a first version of HilolTest APIs",
+	Title:            "Test CRUD API",
+	Description:      "This is a first version of Test CRUD APIs",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

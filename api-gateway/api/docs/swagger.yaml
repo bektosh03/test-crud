@@ -29,17 +29,87 @@ definitions:
       message:
         type: string
     type: object
+  ports.UpdatePostRequest:
+    properties:
+      body:
+        type: string
+      post_id:
+        type: integer
+      title:
+        type: string
+    type: object
 info:
   contact:
     email: madaminovsbektosh@gmail.com
     name: Bektosh Madaminov
-  description: This is a first version of HilolTest APIs
-  title: HilolTest API
+  description: This is a first version of Test CRUD APIs
+  title: Test CRUD API
   version: "1.0"
 paths:
-  /posts:
+  /api/posts:
+    get:
+      description: API for fetching a list of posts
+      parameters:
+      - description: page
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: limit
+        in: query
+        name: limit
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ports.ListPostsResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httperr.ErrorResponse'
+      summary: get list of posts
+      tags:
+      - posts
+    put:
+      description: API for updating post's info
+      parameters:
+      - description: post
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/ports.UpdatePostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ports.ResponseMessage'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/httperr.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httperr.ErrorResponse'
+      summary: update post info
+      tags:
+      - posts
+  /api/posts/{post-id}:
     delete:
       description: API for deleting a post
+      parameters:
+      - description: post-id
+        in: path
+        name: post-id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
@@ -59,44 +129,13 @@ paths:
       tags:
       - posts
     get:
-      description: API for fetching a list of posts
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/ports.ListPostsResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/httperr.ErrorResponse'
-      summary: get list of posts
-      tags:
-      - posts
-    put:
-      description: API for updating post's info
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/ports.ResponseMessage'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/httperr.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/httperr.ErrorResponse'
-      summary: update post info
-      tags:
-      - posts
-  /posts/{post-id}:
-    get:
       description: API for fetching an individual post
+      parameters:
+      - description: post-id
+        in: path
+        name: post-id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
@@ -115,7 +154,7 @@ paths:
       summary: get individual post
       tags:
       - posts
-  /posts/download:
+  /api/posts/download:
     post:
       description: API for starting the download of posts
       produces:
@@ -132,7 +171,7 @@ paths:
       summary: start downloading posts
       tags:
       - posts
-  /posts/download/status:
+  /api/posts/download/status:
     get:
       description: API for checking the status of posts download
       produces:

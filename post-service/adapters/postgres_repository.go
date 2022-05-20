@@ -2,8 +2,11 @@ package adapters
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 
+	"github.com/bektosh03/test-crud/common/errs"
 	"github.com/bektosh03/test-crud/post-service/domain/post"
 	"github.com/jmoiron/sqlx"
 )
@@ -32,6 +35,9 @@ func NewPostgresRepository(db *sqlx.DB) *PostgresRepository {
 func (r *PostgresRepository) GetPost(ctx context.Context, postID int) (post.Post, error) {
 	pm, err := getPost(ctx, r.db, postID)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			err = errs.ErrNotFound
+		}
 		return post.Post{}, err
 	}
 
@@ -57,6 +63,10 @@ func (r *PostgresRepository) ListPosts(ctx context.Context, page, limit int) ([]
 }
 
 func (r *PostgresRepository) UpdatePost(ctx context.Context, p post.Post) error {
+	if _, err := r.GetPost(ctx, p.ID()); err != nil {
+		return err
+	}
+
 	pm := postModel{
 		ID:     p.ID(),
 		UserID: p.UserID(),
@@ -68,6 +78,10 @@ func (r *PostgresRepository) UpdatePost(ctx context.Context, p post.Post) error 
 }
 
 func (r *PostgresRepository) DeletePost(ctx context.Context, postID int) error {
+	if _, err := r.GetPost(ctx, postID); err != nil {
+		return err
+	}
+
 	return deletePost(ctx, r.db, postID)
 }
 

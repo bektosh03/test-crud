@@ -114,7 +114,7 @@ func createPost(ctx context.Context, tx *sqlx.Tx, pm postModel) error {
 
 func setDownloadStatus(ctx context.Context, db *sqlx.DB, success bool, downloadErr error) error {
 	query := fmt.Sprintf(
-		`INSERT INTO %s (success, err) VALUES ($1, $2)`, downloadStatusTableName,
+		`INSERT INTO %s (success, error) VALUES ($1, $2)`, downloadStatusTableName,
 	)
 	var errWrapper sql.NullString
 	if downloadErr != nil {
@@ -130,7 +130,7 @@ func setDownloadStatus(ctx context.Context, db *sqlx.DB, success bool, downloadE
 }
 
 func getDownloadStatus(ctx context.Context, db *sqlx.DB) (success bool, errMsg string, err error) {
-	query := fmt.Sprintf(`SELECT * FROM %s ORDER BY created_at ASC LIMIT 1`, downloadStatusTableName)
+	query := fmt.Sprintf(`SELECT success, error FROM %s ORDER BY created_at ASC LIMIT 1`, downloadStatusTableName)
 	var errWrapper sql.NullString
 
 	err = db.QueryRowxContext(ctx, query).Scan(&success, &errWrapper)

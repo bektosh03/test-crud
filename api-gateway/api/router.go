@@ -10,9 +10,9 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
-// @title        HilolTest API
+// @title        Test CRUD API
 // @version      1.0
-// @description  This is a first version of HilolTest APIs
+// @description  This is a first version of Test CRUD APIs
 
 // @contact.name   Bektosh Madaminov
 // @contact.email  madaminovsbektosh@gmail.com
@@ -24,4 +24,7 @@ func InitRoutes(cfg config.Config, router chi.Router, s ports.HTTPServer) {
 	router.Post("/posts/download", s.DownloadPosts)
 	router.Get("/posts/download/status", s.GetDownloadStatus)
 	router.Get("/posts/{post-id}", s.GetPost)
+	router.Get("/posts", s.ListPosts)
+	router.Put("/posts", s.UpdatePost)
+	router.Delete("/posts/{post-id}", s.DeletePost)
 }

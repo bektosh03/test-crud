@@ -8,6 +8,7 @@ import (
 	"github.com/bektosh03/test-crud/genprotos/postpb"
 	"github.com/bektosh03/test-crud/post-service/app"
 	"github.com/bektosh03/test-crud/post-service/domain/post"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -59,6 +60,7 @@ func (s GrpcServer) UpdatePost(ctx context.Context, request *postpb.Post) (*empt
 	}
 
 	err = s.app.Commands.UpdatePost.Handle(ctx, p)
+	logrus.Infof("Update err=%v", err)
 	if errors.Is(err, errs.ErrNotFound) {
 		return &emptypb.Empty{}, status.Error(codes.NotFound, err.Error())
 	}

@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/bektosh03/test-crud/data-service/app"
 	"github.com/bektosh03/test-crud/common/errs"
+	"github.com/bektosh03/test-crud/data-service/app"
 	"github.com/bektosh03/test-crud/genprotos/datapb"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
@@ -25,7 +25,10 @@ func NewGrpcServer(app *app.App) GrpcServer {
 }
 
 func (s GrpcServer) DownloadPosts(ctx context.Context, _ *datapb.DownloadPostsRequest) (*emptypb.Empty, error) {
-	success, _, err := s.app.GetDownloadStatus(ctx)
+	if s.app.IsDownloadInProgress() {
+		return &emptypb.Empty{}, status.Error(codes.InvalidArgument, "download is in progress, please wait")
+	}
+	success, _, err := s.app.GetDownloadStatus(context.Background())
 	if err != nil && err != errs.ErrNotFound {
 		return &emptypb.Empty{}, status.Error(codes.Internal, fmt.Sprintf("counld not get download status: %v", err))
 	}
@@ -35,12 +38,13 @@ func (s GrpcServer) DownloadPosts(ctx context.Context, _ *datapb.DownloadPostsRe
 	}
 
 	go func() {
-		err := s.app.DownloadPosts(ctx)
+		err := s.app.DownloadPosts(context.Background())
 		if err != nil {
 			logrus.Info("setting operations status to unsuccessfull")
-			if updateErr := s.app.SetDownloadStatus(ctx, false, err); updateErr != nil {
-				logrus.Errorf("failed to set download status: %v", updateErr)
-			}
+		}
+
+		if updateErr := s.app.SetDownloadStatus(context.Background(), err == nil, err); updateErr != nil {
+			logrus.Errorf("failed to set download status: %v", updateErr)
 		}
 	}()
 

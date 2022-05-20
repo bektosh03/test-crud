@@ -20,16 +20,22 @@ const (
 )
 
 type App struct {
-	postRepo post.Repository
+	postRepo             post.Repository
+	isDownloadInProgress bool
 }
 
-func New(postRepo post.Repository) App {
-	return App{
+func New(postRepo post.Repository) *App {
+	return &App{
 		postRepo: postRepo,
 	}
 }
 
-func (a App) DownloadPosts(ctx context.Context) error {
+func (a *App) DownloadPosts(ctx context.Context) error {
+	a.isDownloadInProgress = true
+	defer func() {
+		a.isDownloadInProgress = false
+	}()
+
 	wp := worker.NewPool(4)
 	jobs := a.createJobs(postsURL, numPages)
 
@@ -77,15 +83,19 @@ func (a App) DownloadPosts(ctx context.Context) error {
 	}
 }
 
-func (a App) SetDownloadStatus(ctx context.Context, success bool, downloadErr error) error {
+func (a *App) IsDownloadInProgress() bool {
+	return a.isDownloadInProgress
+}
+
+func (a *App) SetDownloadStatus(ctx context.Context, success bool, downloadErr error) error {
 	return a.postRepo.SetDownloadStatus(ctx, success, downloadErr)
 }
 
-func (a App) GetDownloadStatus(ctx context.Context) (success bool, errMsg string, err error) {
+func (a *App) GetDownloadStatus(ctx context.Context) (success bool, errMsg string, err error) {
 	return a.postRepo.GetDownloadStatus(ctx)
 }
 
-func (a App) downloadPosts(ctx context.Context, arg interface{}) (interface{}, error) {
+func (a *App) downloadPosts(ctx context.Context, arg interface{}) (interface{}, error) {
 	url, ok := arg.(string)
 	if !ok {
 		return nil, fmt.Errorf("wrong argument type: %T", arg)
@@ -114,7 +124,7 @@ func (a App) downloadPosts(ctx context.Context, arg interface{}) (interface{}, e
 	return response.Data, nil
 }
 
-func (a App) createJobs(url string, pagesCount int) []worker.Job {
+func (a *App) createJobs(url string, pagesCount int) []worker.Job {
 	jobs := make([]worker.Job, 0, pagesCount)
 	urlPaginator := urlpaginator.New(url, pagesCount)
 	for urlPaginator.NextPage() {

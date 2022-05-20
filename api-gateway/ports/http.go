@@ -3,7 +3,6 @@ package ports
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -18,14 +17,15 @@ type HTTPServer struct {
 	postServiceClient postpb.PostServiceClient
 }
 
-func NewHTTPServer(dataServiceClient datapb.DataServiceClient) HTTPServer {
+func NewHTTPServer(dataServiceClient datapb.DataServiceClient, postServiceClient postpb.PostServiceClient) HTTPServer {
 	return HTTPServer{
 		dataServiceClient: dataServiceClient,
+		postServiceClient: postServiceClient,
 	}
 }
 
 // DownloadPosts handler
-// @Router /posts/download [post]
+// @Router /api/posts/download [post]
 // @Summary start downloading posts
 // @Description API for starting the download of posts
 // @Tags posts
@@ -45,7 +45,7 @@ func (s HTTPServer) DownloadPosts(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetDownloadStatus handler
-// @Router /posts/download/status [get]
+// @Router /api/posts/download/status [get]
 // @Summary report back status of downloading posts
 // @Description API for checking the status of posts download
 // @Tags posts
@@ -63,19 +63,19 @@ func (s HTTPServer) GetDownloadStatus(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetPost handler
-// @Router /posts/{post-id} [get]
+// @Router /api/posts/{post-id} [get]
 // @Summary get individual post
 // @Description API for fetching an individual post
 // @Tags posts
+// @Param post-id path int true "post-id"
 // @Produce json
 // @Success 200 {object} Post
 // @Failure 404 {object} httperr.ErrorResponse
 // @Failure 500 {object} httperr.ErrorResponse
 func (s HTTPServer) GetPost(w http.ResponseWriter, r *http.Request) {
-	postIDParam := chi.URLParam(r, "post-id")
-	postID, err := strconv.ParseInt(postIDParam, 10, 64)
+	postID, err := s.extractPostIDParam(r)
 	if err != nil {
-		httperr.BadRequest(fmt.Sprintf("bad value for param 'post-id': %s", postIDParam), w, r)
+		httperr.BadRequest(err.Error(), w, r)
 		return
 	}
 
@@ -87,14 +87,21 @@ func (s HTTPServer) GetPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.respondJSON(w, r, post, http.StatusOK)
+	s.respondJSON(w, r, Post{
+		ID:     int(post.Id),
+		UserID: int(post.UserId),
+		Title:  post.Title,
+		Body:   post.Body,
+	}, http.StatusOK)
 }
 
 // ListPost handler
-// @Router /posts [get]
+// @Router /api/posts [get]
 // @Summary get list of posts
 // @Description API for fetching a list of posts
 // @Tags posts
+// @Param page query int true "page"
+// @Param limit query int true "limit"
 // @Produce json
 // @Success 200 {object} ListPostsResponse
 // @Failure 500 {object} httperr.ErrorResponse
@@ -109,14 +116,15 @@ func (s HTTPServer) ListPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.respondJSON(w, r, posts, http.StatusOK)
+	s.respondJSON(w, r, toListPostsResponse(posts.Posts), http.StatusOK)
 }
 
 // UpdatePost handler
-// @Router /posts [put]
+// @Router /api/posts [put]
 // @Summary update post info
 // @Description API for updating post's info
 // @Tags posts
+// @Param request body UpdatePostRequest true "post"
 // @Produce json
 // @Success 200 {object} ResponseMessage
 // @Failure 404 {object} httperr.ErrorResponse
@@ -144,23 +152,24 @@ func (s HTTPServer) UpdatePost(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeletePost handler
-// @Router /posts [delete]
+// @Router /api/posts/{post-id} [delete]
 // @Summary delete a post
 // @Description API for deleting a post
 // @Tags posts
+// @Param post-id path int true "post-id"
 // @Produce json
 // @Success 200 {object} ResponseMessage
 // @Failure 404 {object} httperr.ErrorResponse
 // @Failure 500 {object} httperr.ErrorResponse
 func (s HTTPServer) DeletePost(w http.ResponseWriter, r *http.Request) {
-	var request DeletePostRequest
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+	postID, err := s.extractPostIDParam(r)
+	if err != nil {
 		httperr.BadRequest(err.Error(), w, r)
 		return
 	}
 
-	_, err := s.postServiceClient.DeletePost(r.Context(), &postpb.DeletePostRequest{
-		PostId: int64(request.PostID),
+	_, err = s.postServiceClient.DeletePost(r.Context(), &postpb.DeletePostRequest{
+		PostId: int64(postID),
 	})
 	if err != nil {
 		httperr.FromGrpcStatusError(err, w, r)
@@ -198,4 +207,9 @@ func (s HTTPServer) parsePageAndLimitQueryParams(r *http.Request) (int64, int64)
 	}
 
 	return page, limit
+}
+
+func (s HTTPServer) extractPostIDParam(r *http.Request) (int64, error) {
+	postIDParam := chi.URLParam(r, "post-id")
+	return strconv.ParseInt(postIDParam, 10, 64)
 }

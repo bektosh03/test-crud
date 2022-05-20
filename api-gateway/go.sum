@@ -7,8 +7,8 @@ github.com/PuerkitoBio/purell v1.1.1/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbt
 github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578/go.mod h1:uGdkoq3SwY9Y+13GIhn11/XLaGBb4BfwItxLd5jeuXE=
 github.com/agiledragon/gomonkey/v2 v2.3.1 h1:k+UnUY0EMNYUFUAQVETGY9uUTxjMdnUkP0ARyJS1zzs=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
-github.com/bektosh03/test-crud/common v0.0.0-20220519092623-3bb29f881ca0 h1:1RnjanB1wa9En7JtobF2ZsED/cVOXwjUZKU2uhg3mCo=
-github.com/bektosh03/test-crud/common v0.0.0-20220519092623-3bb29f881ca0/go.mod h1:9g318fPLJSkZ6W04ocFAR9qzxRJlTN1glLZltwEwo+I=
+github.com/bektosh03/test-crud/common v0.0.0-20220519213244-17e55094fa1d h1:uipKFHjtc4A9tXHrlR0WP9oMn7l1PiQufn1skAZTBA8=
+github.com/bektosh03/test-crud/common v0.0.0-20220519213244-17e55094fa1d/go.mod h1:PDwyH8Wy2gN78FDyWa9MeEAcd4B/mYgW/v8VX8labHw=
 github.com/bektosh03/test-crud/genprotos v0.0.0-20220519092623-3bb29f881ca0 h1:WY88wktFZ4AuulI3VqAhztImvkz+JPuJgXHjxTV9rMw=
 github.com/bektosh03/test-crud/genprotos v0.0.0-20220519092623-3bb29f881ca0/go.mod h1:b1UAA3hEFaRfs5yRGHVMWwVVzgeNXhQlUrnUQxK3l54=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=

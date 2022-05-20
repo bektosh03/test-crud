@@ -49,7 +49,7 @@ func main() {
 
 	app := app.New(adapters.NewPostgresRepository(db))
 	server.RunGRPCServer(cfg.ListenAddress(), func(s *grpc.Server) {
-		svc := ports.NewGrpcServer(&app)
+		svc := ports.NewGrpcServer(app)
 		datapb.RegisterDataServiceServer(s, svc)
 	})
 }

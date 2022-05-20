@@ -45,8 +45,8 @@ func (p Post) validate() error {
 	if p.id == 0 {
 		return errors.New("required id is not provided")
 	}
-	if p.userID == 0 {
-		return errors.New("required user id is not provided")
+	if p.userID < 0 {
+		return errors.New("user id is negative")
 	}
 	if p.title == "" {
 		return errors.New("required title is not provided")
