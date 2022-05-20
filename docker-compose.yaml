@@ -14,6 +14,7 @@ services:
     
   data-service:
     container_name: data-service
+    restart: always
     depends_on:
       - db
     image: crud-data-service:latest
@@ -29,6 +30,7 @@ services:
 
   post-service:
     container_name: post-service
+    restart: always
     image: crud-post-service:latest
     # command: ./scripts/wait-for-db.sh db ./app
     ports:
