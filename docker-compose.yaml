@@ -1,12 +1,54 @@
 version: '3.9'
 services:
-  postgres:
+  db:
+    container_name: db
     image: postgres:13.6
     environment:
-      POSTGRES_DB: 'test-crud'
-      POSTGRES_USER: 'root'
-      POSTGRES_PASSWORD: '12345'
+      - POSTGRES_DB=test-crud
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=12345
     ports:
       - '5432:5432'
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    
+  data-service:
+    container_name: data-service
+    depends_on:
+      - db
+    image: crud-data-service:latest
+    # command: ./scripts/wait-for-db.sh db ./app
+    ports:
+      - '8000:8000'
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=12345
+      - POSTGRES_DB=test-crud
+
+  post-service:
+    container_name: post-service
+    image: crud-post-service:latest
+    # command: ./scripts/wait-for-db.sh db ./app
+    ports:
+      - '8001:8001'
+    depends_on:
+      - db
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=12345
+      - POSTGRES_DB=test-crud
+
+  api-gateway:
+    depends_on:
+      - data-service
+      - post-service
+    image: crud-api-gateway:latest
+    ports:
+      - '8080:8080'
+    environment:
+      - DATA_SERVICE_HOST=data-service
+      - POST_SERVICE_HOST=post-service

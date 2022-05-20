@@ -53,7 +53,7 @@ func (c Config) PostgresConnString() string {
 
 type config struct {
 	Environment      string `envconfig:"ENVIRONMENT" default:"development"`
-	Host             string `envconfig:"HOST" default:"localhost"`
+	Host             string `envconfig:"HOST" default:"0.0.0.0"`
 	Port             int    `envconfig:"PORT" default:"8000"`
 	PostgresHost     string `envconfig:"POSTGRES_HOST" required:"true"`
 	PostgresPort     int    `envconfig:"POSTGRES_PORT" required:"true"`

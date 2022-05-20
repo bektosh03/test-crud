@@ -53,7 +53,7 @@ func (c Config) PostServiceAddr() string {
 
 type config struct {
 	Environment     string `envconfig:"ENVIRONMENT" default:"development"`
-	Host            string `envconfig:"HOST" default:"localhost"`
+	Host            string `envconfig:"HOST" default:"0.0.0.0"`
 	Port            int    `envconfig:"PORT" default:"8080"`
 	DataServiceHost string `envconfig:"DATA_SERVICE_HOST" default:"localhost"`
 	DataServicePort int    `envconfig:"DATA_SERVICE_PORT" default:"8000"`
